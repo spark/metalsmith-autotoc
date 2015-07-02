@@ -50,7 +50,7 @@ module.exports = function(options) {
   options = options || {};
   options.selector = options.selector || 'h2, h3, h4, h5, h6';
   options.headerIdPrefix = options.headerIdPrefix || '';
-  options.createForAll = options.createForAll || false;
+  options.pattern = options.pattern || '';
   options.slug = options.slug || function(innerHTML, originalId) {
     if (originalId) {
       return originalId;
