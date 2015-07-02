@@ -117,9 +117,9 @@ module.exports = function(options) {
       return files[path]
     });
 
-    var matcher = minimatch.Minimatch(options.pattern);
     async.each(fileList, function(file, done) {
-      if(!matcher.match(file)) {
+      var filePath = file.path.href + file.path.base;
+      if(!minimatch(filePath, options.pattern)) {
         done();
       } else {
         var contents = file.contents.toString('utf8');
