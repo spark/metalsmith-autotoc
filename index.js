@@ -116,7 +116,7 @@ module.exports = function(options) {
     });
 
     async.each(fileList, function(file, done) {
-      if (!file.autotoc) {
+      if (!file.autotoc && !options.createForAll) {
         done();
       } else {
         var contents = file.contents.toString('utf8');
