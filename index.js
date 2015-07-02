@@ -2,6 +2,7 @@
 var jsdom = require('jsdom');
 var async = require('async');
 var slug = require('slug');
+var minimatch = require('minimatch');
 
 var TocItem = function() {
   TocItem.prototype.init.apply(this, arguments);
@@ -116,8 +117,9 @@ module.exports = function(options) {
       return files[path]
     });
 
+    var matcher = minimatch.Minimatch(options.pattern);
     async.each(fileList, function(file, done) {
-      if (!file.autotoc && !options.createForAll) {
+      if(!matcher.match(file)) {
         done();
       } else {
         var contents = file.contents.toString('utf8');
