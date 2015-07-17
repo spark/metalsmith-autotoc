@@ -13,11 +13,13 @@ TocItem.prototype = {
    * @param {Object} [params]
    * @param {String} [params.id]
    * @param {String} [params.text]
+   * @param {String} [params.dataHref]
    */
   init: function(params) {
     params = params || {};
     this.id = params.id || '';
     this.text = params.text || '';
+    this.dataHref = params.dataHref;
     this.children = [];
     this.parent = null;
   },
@@ -36,6 +38,7 @@ TocItem.prototype = {
     return {
       id: this.id,
       text: this.text,
+      dataHref: this.dataHref,
       children: this.children
     };
   }
@@ -76,6 +79,7 @@ module.exports = function(options) {
       return {
         id: header.id,
         text: header.innerHTML,
+        dataHref: header.dataHref,
         level: parseInt(header.tagName.match(/^h([123456])$/i)[1], 10)
       };
     });
@@ -86,6 +90,7 @@ module.exports = function(options) {
       var id = header.id;
       var text = header.text;
       var level = header.level;
+      var dataHref =  header.dataHref;
 
       while (level != 1 + lastLevel) {
         if (level < 1 + lastLevel) {
@@ -101,7 +106,8 @@ module.exports = function(options) {
 
       var newToc = new TocItem({
         text: text,
-        id: id
+        id: id,
+        dataHref: dataHref
       });
 
       toc.add(newToc);
@@ -135,7 +141,9 @@ module.exports = function(options) {
             var headers = Array.prototype.slice.call(
               window.document.querySelectorAll(file.autotocSelector || options.selector || 'h3, h4')
             ).map(function(header) {
+              var headerDataHref = header.getAttribute('data-href');
               header.id = options.slug(header.innerHTML, header.id);
+              header.dataHref = headerDataHref;
               return header;
             });
 
