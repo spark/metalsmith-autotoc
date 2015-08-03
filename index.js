@@ -78,7 +78,7 @@ module.exports = function(options) {
     headers = headers.map(function(header) {
       return {
         id: header.id,
-        text: header.innerHTML,
+        text: header.innerHTML.replace(/<[^>]*>/g, ""),
         dataHref: header.dataHref,
         level: parseInt(header.tagName.match(/^h([123456])$/i)[1], 10)
       };
