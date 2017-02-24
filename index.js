@@ -1,7 +1,7 @@
 
 var jsdom = require('jsdom');
 var async = require('async');
-var slug = require('slug');
+var slug = require('./slug');
 var minimatch = require('minimatch');
 
 var TocItem = function() {
