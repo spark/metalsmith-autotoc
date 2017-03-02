@@ -1,5 +1,5 @@
 
-var jsdom = require('jsdom');
+var cheerio = require('cheerio');
 var async = require('async');
 var slug = require('./slug');
 var minimatch = require('minimatch');
@@ -74,16 +74,6 @@ module.exports = function(options) {
 
     var root = new TocItem();
     var toc = root;
-
-    headers = headers.map(function(header) {
-      return {
-        id: header.id,
-        text: header.innerHTML.replace(/<[^>]*>/g, ""),
-        dataHref: header.dataHref,
-        level: parseInt(header.tagName.match(/^h([123456])$/i)[1], 10)
-      };
-    });
-
     var lastLevel = getRootLevel(headers);
 
     headers.forEach(function(header) {
@@ -130,28 +120,23 @@ module.exports = function(options) {
         done();
       } else {
         var contents = file.contents.toString('utf8');
-        jsdom.env({
-          html: '<html><body>' + contents + '</body></html>',
-          feature: {QuerySelector: true},
-          done: function(error, window) {
-            if (error) {
-              throw error;
-            }
+        var $ = cheerio.load(contents);
+        var headers = $(file.autotocSelector || options.selector || 'h3, h4')
+          .map(function (i, el) {
+            var header = $(el);
+            header.attr('id', options.slug(header.html(), header.attr('id')));
 
-            var headers = Array.prototype.slice.call(
-              window.document.querySelectorAll(file.autotocSelector || options.selector || 'h3, h4')
-            ).map(function(header) {
-              var headerDataHref = header.getAttribute('data-href');
-              header.id = options.slug(header.innerHTML, header.id);
-              header.dataHref = headerDataHref;
-              return header;
-            });
+            return {
+                id: header.attr('id'),
+                text: header.html().replace(/<[^>]*>/g, ""),
+                dataHref: header.data('href'),
+                level: parseInt(el.tagName.match(/^h([123456])$/i)[1], 10)
+            };
+          }).get();
 
-            file.contents = new Buffer(window.document.body.innerHTML);
-            file.toc = buildTocItems(headers);
-            done();
-          }
-        });
+        file.contents = new Buffer($.html());
+        file.toc = buildTocItems(headers);
+        done();
       }
     }, function() {
       done();
